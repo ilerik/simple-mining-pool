@@ -75,12 +75,17 @@ transactions! {
             seed:    u64,
         }
 
-        /// Create wallet with the given `name`.
+        /// Create account with the given `name`.
         struct CreateAccount {
             pub_key:            &PublicKey,
             name:               &str,
         }
 
+        /// Create wallet with the given `name`.
+        struct SignIn {
+            pub_key:            &PublicKey,
+            name:               &str,
+        }
     }
 }
 
@@ -133,6 +138,26 @@ impl Transaction for Issue {
 }
 
 impl Transaction for CreateAccount {
+    fn verify(&self) -> bool {
+        self.verify_signature(self.pub_key())
+    }
+
+    fn execute(&self, fork: &mut Fork) -> ExecutionResult {
+        let mut schema = CoreSchema::new(fork);
+        let pub_key = self.pub_key();
+        let hash = self.hash();
+
+        if schema.account(pub_key).is_none() {
+            let name = self.name();
+            schema.create_account(pub_key, name, &hash);
+            Ok(())
+        } else {
+            Err(Error::AccountAlreadyExists)?
+        }
+    }
+}
+
+impl Transaction for SignIn {
     fn verify(&self) -> bool {
         self.verify_signature(self.pub_key())
     }
