@@ -1,0 +1,18 @@
+version: '3.2'
+
+services:
+  # Core service that provides RESTful API
+  backend:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    image: ilerik/simple-mining-pool:staging
+    ports:
+    - 9200:8200
+    - 9091:8091
+    restart: on-failure
+    volumes:
+      - simple-mining-db:/run/data/db
+
+volumes:
+  simple-mining-db:

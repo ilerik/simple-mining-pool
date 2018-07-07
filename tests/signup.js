@@ -5,8 +5,51 @@ const crypto = require('crypto');
 const secp256k1 = require('secp256k1');
 const bitcoin = require('bitcoinjs-lib');
 const ethUtils = require('ethereumjs-util');
+const Exonum = require('exonum-client');
 
 const fetch = require('isomorphic-fetch');
+
+function createAccount() {
+    let privKey = '0a8779e7a5edeaf71455a06205493fd5c4b4623d24755edc4013238145cd7982814bca90d29c116b62e6d97a11a7178ac43920b6169654a79ed457a863b0f53e';
+    let pubKey = '814bca90d29c116b62e6d97a11a7178ac43920b6169654a79ed457a863b0f53e';
+
+    const CreateTransaction = {
+      protocol_version: 0,
+      service_id: 128,
+      message_id: 2,
+      fields: [
+        { name: 'pub_key', type: Exonum.PublicKey },
+        { name: 'name', type: Exonum.String }
+      ]
+    }
+
+    const TxCreateAccount = Exonum.newMessage(CreateTransaction);
+
+    const data = {
+      pub_key: pubKey,
+      name: 'John Doe'
+    }
+
+    const signature = TxCreateAccount.sign(privKey, data)
+
+    TxCreateAccount.signature = signature
+
+    const hash = TxCreateAccount.hash(data);
+    console.log(TxCreateAccount)
+    return TxCreateAccount.send('http://127.0.0.1:9200/api/services/simple_mining_pool/v1/transaction', 'http://127.0.0.1:9200/api/explorer/v1/transactions?hash=', data, signature)
+    .then(() => {
+      return { data: { tx_hash : hash } }
+    });
+}
+
+// Create account for new user
+
+const data = createAccount();
+// expect(data.data).toEqual({
+// 'tx_hash': '8055cd33cf11106f16321feb37777c3a92cbeaa23b9f7984a5b819ae51fee596'
+// })
+
+return;
 
 function checkStatus(response) {
     if (response.status >= 200 && response.status < 300) {
@@ -66,11 +109,12 @@ var username = "ilerik";
 var uid = pubKey;
 var proof = "";
 var payload = JSON.stringify({ "uid": uid, "username":username, "proof": proof });
-verbose_fetch("http://127.0.0.1:3000/signup", {
-    method: 'post',  
-    headers: {        
-        'Accept': 'application/json',
-        'Content-Type': 'text/javascript'
-    },
-    body: payload,
-})
+// verbose_fetch("http://127.0.0.1:3000/signup", {
+//     method: 'post',  
+//     headers: {        
+//         'Accept': 'application/json',
+//         'Content-Type': 'text/javascript'
+//     },
+//     body: payload,
+// })
+
