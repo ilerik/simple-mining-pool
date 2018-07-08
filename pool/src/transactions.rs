@@ -47,6 +47,13 @@ pub enum Error {
     /// Can be emitted by `Transfer`.
     #[fail(display = "Insufficient currency amount")]
     InsufficientCurrencyAmount = 3,
+
+    /// Sign in failed
+    ///
+    /// Can be emitted by `SignIn`.
+    #[fail(display = "Sign in failed")]
+    AccountDoesntExist = 4,
+    
 }
 
 impl From<Error> for ExecutionError {
@@ -167,12 +174,12 @@ impl Transaction for SignIn {
         let pub_key = self.pub_key();
         let hash = self.hash();
 
-        if schema.account(pub_key).is_none() {
+        if let Some(account) = schema.account(pub_key) {
             let name = self.name();
-            schema.create_account(pub_key, name, &hash);
+            //schema.create_account(pub_key, name, &hash);
             Ok(())
         } else {
-            Err(Error::AccountAlreadyExists)?
+            Err(Error::AccountDoesntExist)?
         }
     }
 }

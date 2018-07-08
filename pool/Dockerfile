@@ -33,8 +33,8 @@ RUN cargo update && cargo build
 #RUN find / -name  "libgflags.so.2"
 
 # Copies testkit files and runs tests
-COPY ./tests ./tests
-RUN cargo test
+#COPY ../tests ./tests
+#RUN cargo test
 
 # Create a new stage with a minimal image
 # because we already have a binary built
