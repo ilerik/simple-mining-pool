@@ -1,29 +1,4 @@
-FROM rust:1.27.0-stretch as build
-
-ENV ROCKSDB_LIB_DIR=/usr/lib/x86_64-linux-gnu
-ENV SNAPPY_LIB_DIR=/usr/lib/x86_64-linux-gnu
-
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        libsodium-dev \
-        libsnappy-dev \
-        librocksdb-dev \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
-#RUN find / -name "librocksdb*"
-#RUN find / -name "libsnappy*"
-#RUN find / -name  "libgflags.so.2"
-
-# Copies testkit files and runs tests
-#COPY ../tests ./tests
-#RUN cargo test
-
-
-
-
-
-
+# Exonum build envinroment
 FROM rust:1.27.2-stretch as build
 
 ENV ROCKSDB_LIB_DIR=/usr/lib/x86_64-linux-gnu
@@ -53,7 +28,8 @@ RUN rm src/*.rs
 # Copies only your actual source code to
 # avoid invalidating the cache at all
 COPY ./src ./src
-RUN cargo update && cargo build
+RUN cargo build
+RUN cargo test
 
 
 # Create a new stage with a minimal image
@@ -96,5 +72,4 @@ VOLUME /run/data
 
 COPY config.toml ./
 COPY launch.sh ./
-RUN chmod +x launch.sh
 CMD ["./launch.sh"]

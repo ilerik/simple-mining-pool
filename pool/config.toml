@@ -1,6 +1,6 @@
 consensus_public_key = "87ebffb42be671f95d08d5f4a36fb69122df6e6ae282bd497b2cd27216aae0f7"
 consensus_secret_key = "31b5df2971f36b18292510f0ae62178da853114b4d8a06d048abced0cdde679787ebffb42be671f95d08d5f4a36fb69122df6e6ae282bd497b2cd27216aae0f7"
-external_address = "127.0.0.1:6331"
+external_address = "198.211.127.116:6331"
 listen_address = "0.0.0.0:6331"
 service_public_key = "24292ed6eb77b3fc1177a7741e15e6f8380ed2ef7d3ba9abdfd193cf0a910aeb"
 service_secret_key = "af0f7d7adeea1751fa86f604544bf8d3efaa81ccc1ad045e92617f8d9ce619f024292ed6eb77b3fc1177a7741e15e6f8380ed2ef7d3ba9abdfd193cf0a910aeb"
@@ -10,8 +10,9 @@ enable_blockchain_explorer = true
 private_api_address = "0.0.0.0:8091"
 public_api_address = "0.0.0.0:8200"
 state_update_timeout = 10000
+allow_origin = "*"
 [[connect_list.peers]]
-address = "127.0.0.1:6331"
+address = "198.211.127.116:6331"
 public_key = "87ebffb42be671f95d08d5f4a36fb69122df6e6ae282bd497b2cd27216aae0f7"
 
 [database]

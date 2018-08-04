@@ -10,3 +10,5 @@ RUN apt-get update \
         librocksdb-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+CMD ["cargo", "-V"]
