@@ -1,12 +1,17 @@
 #!/bin/bash
 set -e
 
+
+# 146.185.145.5
 # Base system and explorer urls
-SYSTEM_URL=http://127.0.0.1:9200/api/system/v1
-EXPLORER_URL=http://127.0.0.1:9200/api/explorer/v1
+# SYSTEM_URL=http://127.0.0.1:9200/api/system/v1
+# EXPLORER_URL=http://127.0.0.1:9200/api/explorer/v1
+SYSTEM_URL=http://146.185.145.5:9200/api/system/v1
+EXPLORER_URL=http://146.185.145.5:9200/api/explorer/v1
 
 # Base URL for simple-mining-pool service endpoints
-BASE_URL=http://127.0.0.1:9200/api/services/simple_mining_pool/v1
+# BASE_URL=http://127.0.0.1:9200/api/services/simple_mining_pool/v1
+BASE_URL=http://146.185.145.5:9200/api/services/simple_mining_pool/v1
 
 # Exit status
 STATUS=0

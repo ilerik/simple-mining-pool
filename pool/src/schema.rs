@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use exonum::crypto::{Hash, PublicKey};
+use exonum::crypto::{hash, Hash, PublicKey};
 use exonum::storage::{Fork, ProofListIndex, ProofMapIndex, Snapshot};
 
 use INITIAL_BALANCE;
 use account::Account;
 
-/// Database schema for the cryptocurrency .
+/// Database schema for the cryptocurrency.
 #[derive(Debug)]
 pub struct CoreSchema<T> {
     view: T,
@@ -32,7 +32,7 @@ impl<T> AsMut<T> for CoreSchema<T> {
 
 impl<T> CoreSchema<T>
 where
-    T: AsRef<Snapshot>,
+    T: AsRef<dyn Snapshot>,
 {
     /// Constructs schema from the database view.
     pub fn new(view: T) -> Self {
@@ -41,12 +41,12 @@ where
 
     /// Returns `MerklePatriciaTable` with accounts.
     pub fn accounts(&self) -> ProofMapIndex<&T, PublicKey, Account> {
-        ProofMapIndex::new("accounts", &self.view)
+        ProofMapIndex::new("simple_mining_pool.accounts", &self.view)
     }
 
     /// Returns history of the account with the given public key.
     pub fn account_history(&self, public_key: &PublicKey) -> ProofListIndex<&T, Hash> {
-        ProofListIndex::new_in_family("account_history", public_key, &self.view)
+        ProofListIndex::new_in_family("simple_mining_pool.account_history", public_key, &self.view)
     }
 
     /// Returns account data for the given public key.
@@ -64,7 +64,7 @@ where
 impl<'a> CoreSchema<&'a mut Fork> {
     /// Returns mutable `MerklePatriciaTable` with accounts.
     pub fn accounts_mut(&mut self) -> ProofMapIndex<&mut Fork, PublicKey, Account> {
-        ProofMapIndex::new("accounts", &mut self.view)
+        ProofMapIndex::new("simple_mining_pool.accounts", &mut self.view)
     }
 
     /// Returns history for the wallet by the given public key.
@@ -72,7 +72,7 @@ impl<'a> CoreSchema<&'a mut Fork> {
         &mut self,
         public_key: &PublicKey,
     ) -> ProofListIndex<&mut Fork, Hash> {
-        ProofListIndex::new_in_family("account_history", public_key, &mut self.view)
+        ProofListIndex::new_in_family("simple_mining_pool.account_history", public_key, &mut self.view)
     }
 
     /// Increase balance of the account and append new record to its history.
@@ -109,8 +109,20 @@ impl<'a> CoreSchema<&'a mut Fork> {
             let mut history = self.account_history_mut(key);
             history.push(*transaction);
             let history_hash = history.merkle_root();
-            Account::new(key, name, INITIAL_BALANCE, history.len(), &history_hash)
+            Account::new(key, name, INITIAL_BALANCE, &Hash::default(), history.len(), &history_hash)
         };
         self.accounts_mut().put(key, account);
+    }
+
+    /// Sign in into the system and change account state to incorporate proof of authenticity
+    pub fn sign_into_account(&mut self, account: Account, token: &str, transaction: &Hash) {
+        let account = {
+            let mut history = self.account_history_mut(account.pub_key());
+            history.push(*transaction);
+            let history_hash = history.merkle_root();
+            let token_hash = hash(token.as_bytes());
+            account.set_access_token(&token_hash, &history_hash)
+        };
+        self.accounts_mut().put(account.pub_key(), account.clone());
     }
 }

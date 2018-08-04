@@ -1,16 +1,30 @@
-//! Account.
+// Copyright 2018 The Exonum Team
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+//! Wallet.
 
 use exonum::crypto::{Hash, PublicKey};
 
 encoding_struct! {
-    /// Account information stored in the database.
+    /// Wallet information stored in the database.
     struct Account {
         pub_key:            &PublicKey,
         name:               &str,
         balance:            u64,
+        access_token_hash:  &Hash,
         history_len:        u64,
         history_hash:       &Hash,
-        //access_log_hash:    &Hash,
     }
 }
 
@@ -21,6 +35,19 @@ impl Account {
             self.pub_key(),
             self.name(),
             balance,
+            self.access_token_hash(),
+            self.history_len() + 1,
+            history_hash,
+        )
+    }
+
+    /// Return a copy of this account with update token info
+    pub fn set_access_token(self, token_hash: &Hash, history_hash: &Hash) -> Self {
+        Self::new(
+            self.pub_key(),
+            self.name(),
+            self.balance(),
+            token_hash,
             self.history_len() + 1,
             history_hash,
         )

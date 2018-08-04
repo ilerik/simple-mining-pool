@@ -1,4 +1,26 @@
-[consensus_config]
+consensus_public_key = "87ebffb42be671f95d08d5f4a36fb69122df6e6ae282bd497b2cd27216aae0f7"
+consensus_secret_key = "31b5df2971f36b18292510f0ae62178da853114b4d8a06d048abced0cdde679787ebffb42be671f95d08d5f4a36fb69122df6e6ae282bd497b2cd27216aae0f7"
+external_address = "127.0.0.1:6331"
+listen_address = "0.0.0.0:6331"
+service_public_key = "24292ed6eb77b3fc1177a7741e15e6f8380ed2ef7d3ba9abdfd193cf0a910aeb"
+service_secret_key = "af0f7d7adeea1751fa86f604544bf8d3efaa81ccc1ad045e92617f8d9ce619f024292ed6eb77b3fc1177a7741e15e6f8380ed2ef7d3ba9abdfd193cf0a910aeb"
+
+[api]
+enable_blockchain_explorer = true
+private_api_address = "0.0.0.0:8091"
+public_api_address = "0.0.0.0:8200"
+state_update_timeout = 10000
+[[connect_list.peers]]
+address = "127.0.0.1:6331"
+public_key = "87ebffb42be671f95d08d5f4a36fb69122df6e6ae282bd497b2cd27216aae0f7"
+
+[database]
+create_if_missing = true
+[[genesis.validator_keys]]
+consensus_key = "87ebffb42be671f95d08d5f4a36fb69122df6e6ae282bd497b2cd27216aae0f7"
+service_key = "24292ed6eb77b3fc1177a7741e15e6f8380ed2ef7d3ba9abdfd193cf0a910aeb"
+
+[genesis.consensus]
 max_message_len = 1048576
 max_propose_timeout = 200
 min_propose_timeout = 10
@@ -8,7 +30,20 @@ round_timeout = 3000
 status_timeout = 5000
 txs_block_limit = 1000
 
-[general_config]
-validators_count = 1
+[mempool]
+tx_pool_capacity = 100000
 
-[services_config]
+[mempool.events_pool_capacity]
+api_requests_capacity = 1024
+internal_events_capacity = 128
+network_events_capacity = 512
+network_requests_capacity = 512
+
+[network]
+max_incoming_connections = 128
+max_outgoing_connections = 128
+tcp_connect_max_retries = 10
+tcp_connect_retry_timeout = 15000
+tcp_nodelay = true
+
+[services_configs]

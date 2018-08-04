@@ -14,31 +14,33 @@
 
 //! Cryptocurrency implementation example using [exonum](http://exonum.com/).
 
-extern crate bodyparser;
+#![deny(missing_debug_implementations, unsafe_code)]
+
 #[macro_use]
 extern crate exonum;
 #[macro_use]
 extern crate failure;
-extern crate iron;
-extern crate router;
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
+extern crate frank_jwt as jwt;
+#[macro_use]
+extern crate serde_json as json;
+use exonum::encoding::serialize::json::reexport as serde_json;
 
 pub use schema::CoreSchema;
+pub use error::Error;
 
+pub mod error;
 pub mod api;
 pub mod schema;
 pub mod transactions;
 pub mod account;
 
-use iron::Handler;
-use router::Router;
-
-use exonum::blockchain::{ApiContext, Service, Transaction, TransactionSet};
+use exonum::api::ServiceApiBuilder;
+use exonum::blockchain::{Service, Transaction, TransactionSet};
 use exonum::crypto::Hash;
 use exonum::encoding::Error as EncodingError;
-use exonum::encoding::serialize::json::reexport as serde_json;
 use exonum::helpers::fabric::{self, Context};
 use exonum::messages::RawTransaction;
 use exonum::storage::Snapshot;
@@ -47,7 +49,8 @@ use transactions::CoreTransactions;
 
 /// Unique service ID.
 const CORE_SERVICE_ID: u16 = 128;
-
+/// Name of the service.
+pub const SERVICE_NAME: &str = "simple_mining_pool";
 /// Initial balance of the wallet.
 const INITIAL_BALANCE: u64 = 100;
 
@@ -57,39 +60,36 @@ pub struct CoreService;
 
 impl Service for CoreService {
     fn service_name(&self) -> &str {
-        "simple_mining_pool"
+        SERVICE_NAME
     }
 
     fn service_id(&self) -> u16 {
         CORE_SERVICE_ID
     }
 
-    fn state_hash(&self, view: &Snapshot) -> Vec<Hash> {
+    fn state_hash(&self, view: &dyn Snapshot) -> Vec<Hash> {
         let schema = CoreSchema::new(view);
         schema.state_hash()
     }
 
-    fn tx_from_raw(&self, raw: RawTransaction) -> Result<Box<Transaction>, EncodingError> {
+    fn tx_from_raw(&self, raw: RawTransaction) -> Result<Box<dyn Transaction>, EncodingError> {
         CoreTransactions::tx_from_raw(raw).map(Into::into)
     }
 
-    fn public_api_handler(&self, ctx: &ApiContext) -> Option<Box<Handler>> {
-        let mut router = Router::new();
-        use api;
-        use exonum::api::Api;
-        let api = api::CoreApi {
-            channel: ctx.node_channel().clone(),
-            blockchain: ctx.blockchain().clone(),
-        };
-        api.wire(&mut router);
-        Some(Box::new(router))
+    fn wire_api(&self, builder: &mut ServiceApiBuilder) {
+        api::CoreApi::wire(builder);
     }
 }
 
+#[derive(Debug)]
 pub struct ServiceFactory;
 
 impl fabric::ServiceFactory for ServiceFactory {
-    fn make_service(&mut self, _: &Context) -> Box<Service> {
+    fn service_name(&self) -> &str {
+        SERVICE_NAME
+    }
+
+    fn make_service(&mut self, _: &Context) -> Box<dyn Service> {
         Box::new(CoreService)
     }
 }

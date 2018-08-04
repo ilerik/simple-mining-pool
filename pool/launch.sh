@@ -1,6 +1,8 @@
 #!/bin/bash
-cp ./target/debug/simple-mining-pool ./
-rm -rf ./data && mkdir -p ./data
-./simple-mining-pool generate-config ./config.toml  data/pub.toml data/sec.toml --peer-address 127.0.0.1:6331
-./simple-mining-pool finalize --public-api-address 0.0.0.0:9200 --private-api-address 0.0.0.0:9091 data/sec.toml data/node_cfg.toml --public-configs data/pub.toml
-./simple-mining-pool run --node-config data/node_cfg.toml --db-path data/db --public-api-address 0.0.0.0:9200
+HOST_IP=${HOST_IP:-"127.0.0.1"}
+HOST_PUBLIC_API_PORT=${HOST_PUBLIC_API_PORT:-"8200"}
+SIMPLE_CONFIG_PATH=${SIMPLE_CONFIG_PATH:-"config.toml"}
+SIMPLE_DB_PATH=${SIMPLE_DB_PATH:-"data/db"}
+
+# Runs command
+${1:-$SIMPLE_BIN_PATH} run --node-config $SIMPLE_CONFIG_PATH --db-path $SIMPLE_DB_PATH --public-api-address $HOST_IP:$HOST_PUBLIC_API_PORT

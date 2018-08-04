@@ -17,10 +17,15 @@ use exonum::crypto::{CryptoHash, PublicKey};
 use exonum::messages::Message;
 use exonum::storage::Fork;
 
+use serde_json;
+use jwt::{encode, Algorithm};
+
 use CORE_SERVICE_ID;
 use schema::CoreSchema;
 
-/// Error codes emitted by wallet transactions during execution.
+static SERVANT_SECRET: &str = "secretsecret";
+
+/// Error codes emitted by core service transactions during execution.
 #[derive(Debug, Fail)]
 #[repr(u8)]
 pub enum Error {
@@ -52,8 +57,7 @@ pub enum Error {
     ///
     /// Can be emitted by `SignIn`.
     #[fail(display = "Sign in failed")]
-    AccountDoesntExist = 4,
-    
+    AuthenticationFailed = 4,
 }
 
 impl From<Error> for ExecutionError {
@@ -67,7 +71,7 @@ transactions! {
     pub CoreTransactions {
         const SERVICE_ID = CORE_SERVICE_ID;
 
-        /// Transfer `amount` of the currency from one wallet to another.
+        /// Transfer `amount` of the currency from one account to another.
         struct Transfer {
             from:    &PublicKey,
             to:      &PublicKey,
@@ -75,7 +79,7 @@ transactions! {
             seed:    u64,
         }
 
-        /// Issue `amount` of the currency to the `wallet`.
+        /// Issue `amount` of the currency to the `account`.
         struct Issue {
             pub_key:  &PublicKey,
             amount:  u64,
@@ -88,7 +92,7 @@ transactions! {
             name:               &str,
         }
 
-        /// Create wallet with the given `name`.
+        // Signin into account and obtain JWT after authentication
         struct SignIn {
             pub_key:            &PublicKey,
             name:               &str,
@@ -175,11 +179,35 @@ impl Transaction for SignIn {
         let hash = self.hash();
 
         if let Some(account) = schema.account(pub_key) {
+            // Check authenticity of sender
             let name = self.name();
-            //schema.create_account(pub_key, name, &hash);
+            if account.name() != name { 
+                Err(Error::AuthenticationFailed)?
+            }
+            // Generate token for further authentication
+            let rank: bool = true;
+            
+            // Prepare token payload
+            let mut payload = json!({                        
+                "sub" : pub_key,
+                "name" : name,
+                "rank" : rank,
+            });
+
+            // and header
+            let mut header = json!({
+            });
+
+            // Generate JWT and serialize it        
+            let jwt = encode(header, &SERVANT_SECRET.to_string(), &payload, Algorithm::HS256).map_err(|_| Error::AuthenticationFailed)?;
+            let token = serde_json::to_string(&jwt).map_err(|_| Error::AuthenticationFailed)?;                   
+
+            // Update blockchain state
+            schema.sign_into_account(account, &token, &hash);
+
             Ok(())
         } else {
-            Err(Error::AccountDoesntExist)?
+            Err(Error::AuthenticationFailed)?
         }
     }
 }

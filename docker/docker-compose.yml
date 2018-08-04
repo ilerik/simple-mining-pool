@@ -1,0 +1,9 @@
+version: '3.2'
+
+services:
+  # build environment image
+  exobox:
+    build:
+      context: ./exobox
+      dockerfile: Dockerfile
+    image: ilerik/exobox:0.9.0

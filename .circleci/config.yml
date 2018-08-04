@@ -1,0 +1,65 @@
+version: 2
+
+references:
+  target_restore_cache: &target_restore_cache
+    restore_cache:
+      keys:
+        - all-targets-{{ checksum "Cargo.lock" }}
+        - all-targets-
+  target_save_cache: &target_save_cache
+    save_cache:
+      key: all-targets-{{ checksum "Cargo.lock" }}
+      paths:
+        - /usr/local/cargo/registry
+        - ./target
+      when: on_success
+
+jobs:
+  test:    
+    docker:
+      - image: ilerik/exobox:0.9.0
+        auth:
+          username: ilerik
+          password: $DOCKERHUB_PASSWORD
+    resource_class: medium
+    steps:
+      - checkout
+      - *target_restore_cache
+      - run:
+          name: Compile a local package and all of its dependencies
+          no_output_timeout: 1h
+          command: |
+            cargo build --manifest-path ./pool/Cargo.toml
+      - run: cargo test --manifest-path ./pool/Cargo.toml
+      - *target_save_cache
+  compose:
+    docker:
+      - image: docker:17.12.1-ce
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - *target_restore_cache
+      - run:
+          name: Build Dockerfile
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "master" ] || [ "${CIRCLE_BRANCH}" == "staging" ]; then
+              docker build -t $CIRCLE_PROJECT_REPONAME:$CIRCLE_SHA1 ./pool
+            fi
+      - run:
+          name: Push container into Docker Registry
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "master" ] || [ "${CIRCLE_BRANCH}" == "staging" ]; then
+              docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
+              docker tag ${CIRCLE_PROJECT_REPONAME}:${CIRCLE_SHA1} ${DOCKER_USER}/${CIRCLE_PROJECT_REPONAME}:${CIRCLE_BRANCH}
+              docker push ${DOCKER_USER}/${CIRCLE_PROJECT_REPONAME}:${CIRCLE_BRANCH}
+            fi
+
+workflows:
+  version: 2
+  test_compose_deploy:
+    jobs:
+      - test
+      - compose:
+          requires:
+            - test
