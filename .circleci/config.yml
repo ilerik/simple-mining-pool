@@ -4,11 +4,11 @@ references:
   target_restore_cache: &target_restore_cache
     restore_cache:
       keys:
-        - all-targets-{{ checksum "Cargo.lock" }}
+        - all-targets-{{ checksum "pool/Cargo.lock" }}
         - all-targets-
   target_save_cache: &target_save_cache
     save_cache:
-      key: all-targets-{{ checksum "Cargo.lock" }}
+      key: all-targets-{{ checksum "pool/Cargo.lock" }}
       paths:
         - /usr/local/cargo/registry
         - ./target
