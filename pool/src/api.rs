@@ -26,7 +26,7 @@ use exonum::storage::{ListProof, MapProof};
 
 use transactions::CoreTransactions;
 use account::Account;
-use {CoreSchema, CORE_SERVICE_ID};
+use {CoreSchema, SERVICE_ID};
 
 /// The structure describes the query parameters for the `get_wallet` endpoint.
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
@@ -74,7 +74,7 @@ pub struct CoreApi;
 impl CoreApi
 {
     /// Helper function reading blockchain state
-    ///fetch account info
+    /// fetch account info
     /// meaning proofs, history
     fn get_account_info(state: &ServiceApiState, query: AccountQuery) -> ExonumApiResult<AccountInfo> {
         let snapshot = state.snapshot();
@@ -88,7 +88,7 @@ impl CoreApi
             .unwrap();
 
         let to_table: MapProof<Hash, Hash> =
-            general_schema.get_proof_to_service_table(CORE_SERVICE_ID, 0);
+            general_schema.get_proof_to_service_table(SERVICE_ID, 0);
 
         let to_account: MapProof<PublicKey, Account> = core_schema.accounts().get_proof(query.pub_key);
 
@@ -142,6 +142,7 @@ impl CoreApi
             .ok_or_else(|| api::Error::NotFound("\"Account not found\"".to_owned()))
     }
 
+    /// Wire endpoints
     pub fn wire(builder: &mut ServiceApiBuilder) {
         builder
             .public_scope()

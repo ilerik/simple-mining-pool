@@ -48,7 +48,7 @@ use exonum::storage::Snapshot;
 use transactions::CoreTransactions;
 
 /// Unique service ID.
-const CORE_SERVICE_ID: u16 = 128;
+const SERVICE_ID: u16 = 128;
 /// Name of the service.
 pub const SERVICE_NAME: &str = "simple_mining_pool";
 /// Initial balance of the wallet.
@@ -64,7 +64,7 @@ impl Service for CoreService {
     }
 
     fn service_id(&self) -> u16 {
-        CORE_SERVICE_ID
+        SERVICE_ID
     }
 
     fn state_hash(&self, view: &dyn Snapshot) -> Vec<Hash> {

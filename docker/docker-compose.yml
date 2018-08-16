@@ -6,4 +6,4 @@ services:
     build:
       context: ./exobox
       dockerfile: Dockerfile
-    image: ilerik/exobox:0.9.0
+    image: ilerik/exobox:0.9.1

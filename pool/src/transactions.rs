@@ -20,7 +20,7 @@ use exonum::storage::Fork;
 use serde_json;
 use jwt::{encode, Algorithm};
 
-use CORE_SERVICE_ID;
+use SERVICE_ID;
 use schema::CoreSchema;
 
 static SERVANT_SECRET: &str = "secretsecret";
@@ -69,7 +69,7 @@ impl From<Error> for ExecutionError {
 
 transactions! {
     pub CoreTransactions {
-        const SERVICE_ID = CORE_SERVICE_ID;
+        const SERVICE_ID = SERVICE_ID;
 
         /// Transfer `amount` of the currency from one account to another.
         struct Transfer {

@@ -4,14 +4,12 @@ services:
   # Core service that provides RESTful API
   backend:
     image: ilerik/simple-mining-pool:staging
-    environment:
-      - HOST_IP=0.0.0.0
     ports:
       - 8200:8200
       - 8091:8091
     restart: on-failure
     volumes:
-      - simple-mining-db:/run/data/db
+      - simple-staging-db:/run/data/db
 
 volumes:
-  simple-mining-db:
+  simple-staging-db:
