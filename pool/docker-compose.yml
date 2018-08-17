@@ -8,8 +8,8 @@ services:
       dockerfile: Dockerfile
     image: ilerik/simple-mining-pool:staging
     ports:
-      - 8200:8200
-      - 8091:8091
+      - 0.0.0.0:8200:8200
+      - 0.0.0.0:8091:8091
     restart: on-failure
     volumes:
       - simple-staging-db:/run/data
