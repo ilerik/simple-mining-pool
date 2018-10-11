@@ -32,8 +32,8 @@ pub use schema::CoreSchema;
 pub use error::Error;
 
 pub mod error;
-pub mod api;
 pub mod schema;
+pub mod api;
 pub mod transactions;
 pub mod account;
 
@@ -50,7 +50,7 @@ use transactions::CoreTransactions;
 /// Unique service ID.
 const SERVICE_ID: u16 = 128;
 /// Name of the service.
-pub const SERVICE_NAME: &str = "simple_mining_pool";
+pub const SERVICE_NAME: &str = "simple";
 /// Initial balance of the wallet.
 const INITIAL_BALANCE: u64 = 100;
 
