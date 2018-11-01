@@ -34,7 +34,7 @@ jobs:
       - *target_save_cache
   compose:
     docker:
-      - image: docker:17.12.1-ce
+      - image: docker:18.06.1-ce
     steps:
       - checkout
       - setup_remote_docker:
