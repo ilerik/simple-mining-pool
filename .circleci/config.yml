@@ -4,11 +4,11 @@ references:
   target_restore_cache: &target_restore_cache
     restore_cache:
       keys:
-        - all-targets-{{ checksum "pool/Cargo.lock" }}
+        - all-targets-{{ checksum "backend/Cargo.lock" }}
         - all-targets-
   target_save_cache: &target_save_cache
     save_cache:
-      key: all-targets-{{ checksum "pool/Cargo.lock" }}
+      key: all-targets-{{ checksum "backend/Cargo.lock" }}
       paths:
         - /usr/local/cargo/registry
         - ./target
@@ -29,8 +29,8 @@ jobs:
           name: Compile a local package and all of its dependencies
           no_output_timeout: 1h
           command: |
-            cargo build --manifest-path ./pool/Cargo.toml
-      - run: cargo test --manifest-path ./pool/Cargo.toml
+            cargo build --manifest-path ./backend/Cargo.toml
+      - run: cargo test --manifest-path ./backend/Cargo.toml
       - *target_save_cache
   compose:
     docker:
